@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Inicio</title>
-    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+    <!-- href fallback is useful when opening this file directly in a browser (no Thymeleaf processing) -->
+    <link rel="stylesheet" href="css/estilo.css" th:href="@{/css/estilo.css}">
 </head>
 <body>
     <div th:replace="~{fragmentos/nav :: navbar}"></div>
