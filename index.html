@@ -27,8 +27,9 @@
                         <option th:selected="${cat == 'Deportes'}" value="Deportes">Deportes</option>
                         <option th:selected="${cat == 'Otros'}" value="Otros">Otros</option>
                     </select>
-                    <input type="number" name="min" th:value="${min}" step="0.01" placeholder="Precio mínimo" />
-                    <input type="number" name="max" th:value="${max}" step="0.01" placeholder="Precio máximo" />
+                    <!-- If min/max are negative or null, render an empty value; also enforce min=0 client-side -->
+                    <input type="number" name="min" th:value="${min != null and min >= 0 ? min : ''}" min="0" step="1" placeholder="Precio mínimo" />
+                    <input type="number" name="max" th:value="${max != null and max >= 0 ? max : ''}" min="0" step="1" placeholder="Precio máximo" />
                     <button type="submit">🔍 Buscar</button>
                 </form>
             </aside>
