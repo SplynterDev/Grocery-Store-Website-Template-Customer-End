@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio</title>
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+    <div th:replace="~{fragmentos/nav :: navbar}"></div>
+
+    <div class="container">
+        <div th:if="${#authorization.expression('isAuthenticated()')}">
+            <p>Bienvenido, <strong th:text="${#authentication.name}">Usuario</strong></p>
+        </div>
+
+        <div class="layout-productos">
+            <!-- Columna izquierda (buscador) -->
+            <aside class="sidebar">
+                <form class="form-buscador" th:action="@{/}" method="get">
+                    <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre..." />
+                    <select name="cat">
+                        <option value="">Todas</option>
+                        <option th:selected="${cat == 'Tecnología'}" value="Tecnología">Tecnología</option>
+                        <option th:selected="${cat == 'Hogar'}" value="Hogar">Hogar</option>
+                        <option th:selected="${cat == 'Moda'}" value="Moda">Moda</option>
+                        <option th:selected="${cat == 'Deportes'}" value="Deportes">Deportes</option>
+                        <option th:selected="${cat == 'Otros'}" value="Otros">Otros</option>
+                    </select>
+                    <input type="number" name="min" th:value="${min}" step="0.01" placeholder="Precio mínimo" />
+                    <input type="number" name="max" th:value="${max}" step="0.01" placeholder="Precio máximo" />
+                    <button type="submit">🔍 Buscar</button>
+                </form>
+            </aside>
+
+            <!-- Columna derecha (productos) -->
+            <main class="main-productos">
+                <h2>Productos</h2>
+
+                <div th:if="${productos != null and !productos.isEmpty()}" class="contenedor-productos">
+                    <div class="tarjeta-producto" th:each="prod : ${productos}">
+                        <a th:href="@{'/productos/detalle/' + ${prod.id}}">
+                            <img class="img-producto" th:src="@{'/uploads/' + ${prod.imagen}}" alt="Imagen de producto" />
+                        </a>
+
+                        <div class="info-producto">
+                            <h3>
+                                <a th:href="@{'/productos/detalle/' + ${prod.id}}" th:text="${prod.nombre}">Nombre</a>
+                            </h3>
+                            <p th:text="${prod.descripcion}">Descripción</p>
+                            <p>Categoría: <span th:text="${prod.categoria}"></span></p>
+                            <p class="stock">Stock: <span th:text="${prod.stock}"></span></p>
+                            <p class="precio">$<span th:text="${prod.precio}">0.00</span></p>
+
+                            <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                                <a class="admin-link" th:href="@{'/productos/editar/' + ${prod.id}}">✏️ Editar</a> |
+                                <a class="admin-link" th:href="@{'/productos/eliminar/' + ${prod.id}}"
+                                   onclick="return confirm('¿Seguro que querés eliminar este producto?')">🗑️ Eliminar</a>
+                            </div>
+
+                            <div th:if="${#authorization.expression('isAuthenticated()')}">
+                                <div th:if="${prod.stock > 0}">
+                                    <form class="form-agregar-carrito" th:action="@{'/carrito/agregar/' + ${prod.id}}" method="post">
+                                        <label for="cantidad">Cantidad:</label>
+                                        <input type="number" id="cantidad" name="cantidad" min="1"
+                                               th:attr="max=${prod.stock}" value="1" required />
+                                        <button class="btn" type="submit">🛒 Agregar al Carrito</button>
+                                    </form>
+                                </div>
+                                <div th:if="${prod.stock == 0}">
+                                    <p class="mensaje-error">❌ Sin stock disponible</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${productos == null or productos.isEmpty()}">
+                    <p class="mensaje-vacio">🔍 No se encontraron productos con ese criterio.</p>
+                </div>
+
+                <!-- 📄 Paginación -->
+                <div th:if="${totalPages > 1}">
+                    <div class="paginacion">
+                        <a th:if="${currentPage > 0}"
+                           th:href="@{/?page=${currentPage - 1}(q=${q}, cat=${cat}, min=${min}, max=${max})}">« Anterior</a>
+                        <span>Página <span th:text="${currentPage + 1}"></span> de <span th:text="${totalPages}"></span></span>
+                        <a th:if="${currentPage + 1 < totalPages}"
+                           th:href="@{/?page=${currentPage + 1}(q=${q}, cat=${cat}, min=${min}, max=${max})}">Siguiente »</a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
